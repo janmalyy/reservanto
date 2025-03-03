@@ -1,0 +1,7 @@
+pandas~=2.2.3
+google-api-python-client~=2.161.0
+google-auth-httplib2
+google-auth-oauthlib
+protobuf~=5.29.3
+requests~=2.32.3
+dotenv
