@@ -9,6 +9,7 @@ from reservanto.google_sheets import create, export_pandas_df_to_sheets
 if __name__ == '__main__':
     title = "reservanto-automatic"
     email_address = settings.GOOGLE_EMAIL_ADDRESS
+    spreadsheet_id = create(title, email_address)
 
     df = pd.read_csv(settings.RESERVANTO_DIR / "reservanto.csv", sep=";", encoding="utf-8")
 
@@ -19,7 +20,7 @@ if __name__ == '__main__':
 
     # drop rows with deleted customers
     df = df[df["customer"] != "Smazáno"]
-    # drop duplicates   #TODO
+    # drop duplicates
     df.drop_duplicates(keep="last", inplace=True)
 
     time_columns = ["createdAt", "start", "end"]
@@ -28,16 +29,19 @@ if __name__ == '__main__':
     # split phone number and email to separate columns
     phone_pattern = r"\+\d{3} (\d{3} \d{3} \d{3})"  # look for + 420 123 456 789; return only 132 456 789
     email_pattern = r"([\w\.-]+@[\w\.-]+\.\w+)"
-    df["phoneNumber"] = df["customerContact"].str.extract(phone_pattern)
-    df["emailAddress"] = df["customerContact"].str.extract(email_pattern)
+    df["phoneNumber"] = ""
+    df["emailAddress"] = ""
+    phone_extracted = df["customerContact"].str.extract(phone_pattern)
+    email_extracted = df["customerContact"].str.extract(email_pattern)
+    # update the values only where extraction succeeded
+    df.loc[phone_extracted.notna().any(axis=1), "phoneNumber"] = phone_extracted[0]
+    df.loc[email_extracted.notna().any(axis=1), "emailAddress"] = email_extracted[0]
     df.drop(columns=["customerContact"], inplace=True)
-
-
 
     # compute info
     x = 100
-    a, b, c, d = (get_only_once_patients(df).copy(), get_patients_who_did_not_come_x_days(df, x).copy(),
-                  get_last_visits_from_roihunter(df).copy(), get_patients_who_did_not_use_their_voucher(df).copy())
+    a, b, c, d = (get_only_once_patients(df.copy()), get_patients_who_did_not_come_x_days(df.copy(), x),
+                  get_last_visits_from_roihunter(df.copy()), get_patients_who_did_not_use_their_voucher(df.copy()))
     sheets = {
         "přišli_jen_jednou": a,
         f"nepřišli_{x}_dní": b,
@@ -79,16 +83,6 @@ if __name__ == '__main__':
     print(df.info())
 
     # export
-    spreadsheet_id = create(title, email_address)
     export_pandas_df_to_sheets(spreadsheet_id, df, "všechna_data")
     for key, value in sheets.items():
         export_pandas_df_to_sheets(spreadsheet_id, value, key)
-
-    """
-    kolik má zapsaných různých pacientů
-    kteří byli jen jednou na vstupním vyšetření - DONE
-    kolik hodin denně, týdně, měsíčně máma pracuje
-    jsou z roihunteru a kdy byly naposledy - DONE
-    kdo tam už xx dní nebyl - DONE
-    mají permanentku a nevychodili návštěvy - DONE
-    """
