@@ -1,3 +1,5 @@
+import datetime
+
 import pandas as pd
 
 from reservanto import settings
@@ -7,7 +9,8 @@ from reservanto.process_data import (convert_nan_to_empty_strings, get_only_once
 from reservanto.google_sheets import create, export_pandas_df_to_sheets
 
 if __name__ == '__main__':
-    title = "reservanto-automatic"
+    title = "reservanto-automatic-" + str(datetime.date.today())
+    # title = "reservanto-automatic_4.3.2025"
     email_address = settings.GOOGLE_EMAIL_ADDRESS
     spreadsheet_id = create(title, email_address)
 

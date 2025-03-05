@@ -64,6 +64,8 @@ def get_patients_who_did_not_come_x_days(df: pd.DataFrame, x: int = 30) -> pd.Da
 def get_last_visits_from_roihunter(df: pd.DataFrame) -> pd.DataFrame:
     last_visits = get_last_visits(df)
     roi_pattern = r"[rR][oO][iI]"
+    last_visits["bookingNote"] = last_visits["bookingNote"].fillna("")
+    last_visits["emailAddress"] = last_visits["emailAddress"].fillna("")
     return last_visits[last_visits["bookingNote"].str.contains(roi_pattern)
                        | last_visits["emailAddress"].str.contains(roi_pattern)]
 
