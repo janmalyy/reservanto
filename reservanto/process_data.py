@@ -80,7 +80,7 @@ pattern = r"(\d+)[\/\\](\d+)"  # match e.g. 3/4, 1\3, 10/12
 def get_validity(date: datetime.datetime, total_visits: int) -> tuple[bool, timedelta | NaTType]:
     """
     :param date: when the voucher became valid
-    :param total_visits: should be 3 or 5; determines how long the voucher is valid
+    :param total_visits: should be 3 or 5 or 10; determines how long the voucher is valid
     :return: Return whether the voucher is still valid or not and until when it is valid
     For simplicity, the month has always 31 days.
     """
@@ -88,6 +88,8 @@ def get_validity(date: datetime.datetime, total_visits: int) -> tuple[bool, time
         months = 4
     elif total_visits == 5:
         months = 8
+    elif total_visits == 10:
+        months = 12
     else:
         raise ValueError(f"The voucher should be either for 3 or for 5 visits, {total_visits} came instead.")
     today = pd.Timestamp.utcnow()

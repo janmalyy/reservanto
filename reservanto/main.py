@@ -14,7 +14,7 @@ if __name__ == '__main__':
     email_address = settings.GOOGLE_EMAIL_ADDRESS
     spreadsheet_id = create(title, email_address)
 
-    df = pd.read_csv(settings.RESERVANTO_DIR / "reservanto.csv", sep=";", encoding="utf-8")
+    df = pd.read_csv(settings.RESERVANTO_DIR / "reservanto" / "reservanto.csv", sep=";", encoding="utf-8")
 
     # choose only relevant columns
     df = df[["title", "createdAt", "start", "end",
@@ -58,13 +58,14 @@ if __name__ == '__main__':
             sheets[sheet_name] = sheets[sheet_name][["title", "createdAt", "start", "customer",
                                                      "phoneNumber", "emailAddress", "bookingNote",
                                                      "isValidUntil", "isValidVoucher"]]
-            sheets[sheet_name]["isValidUntil"] = sheets[sheet_name]["isValidUntil"].dt.strftime("%d. %m. %Y %H:%M")
+            sheets[sheet_name]["isValidUntil"] = sheets[sheet_name]["isValidUntil"].dt.strftime(date_format)
         else:
             sheets[sheet_name] = sheets[sheet_name][["title", "createdAt", "start", "customer",
                                                      "phoneNumber", "emailAddress", "bookingNote"]]
-        # convert datetime to this format: e.g., 05. 03. 2024 18:28
-        sheets[sheet_name]["createdAt"] = sheets[sheet_name]["createdAt"].dt.strftime("%d. %m. %Y %H:%M")
-        sheets[sheet_name]["start"] = sheets[sheet_name]["start"].dt.strftime("%d. %m. %Y %H:%M")
+        # convert datetime to this format: e.g., 05.03.2024 18:28
+        date_format = "'%d.%m.%Y %H:%M"
+        sheets[sheet_name]["createdAt"] = sheets[sheet_name]["createdAt"].dt.strftime(date_format)
+        sheets[sheet_name]["start"] = sheets[sheet_name]["start"].dt.strftime(date_format)
         sheets[sheet_name] = convert_nan_to_empty_strings(sheets[sheet_name])
         sheets[sheet_name] = sheets[sheet_name][
             sheets[sheet_name]["title"].notna()]  # Get rid of rows with None in title column
@@ -74,9 +75,9 @@ if __name__ == '__main__':
              "customer", "phoneNumber", "emailAddress", "bookingNote",
              "customerId", "bookingNoShowState", "hasCustomerNote", "isFreeTime", "noShowStatus"]]
 
-    df["createdAt"] = df["createdAt"].dt.strftime("%d. %m. %Y %H:%M")
-    df["start"] = df["start"].dt.strftime("%d. %m. %Y %H:%M")
-    df["end"] = df["end"].dt.strftime("%d. %m. %Y %H:%M")
+    df["createdAt"] = df["createdAt"].dt.strftime(date_format)
+    df["start"] = df["start"].dt.strftime(date_format)
+    df["end"] = df["end"].dt.strftime(date_format)
     df = convert_nan_to_empty_strings(df)
     df = df[df["title"].notna()]  # get rid of rows with None in title column
 
