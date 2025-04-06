@@ -61,13 +61,22 @@ def get_patients_who_did_not_come_x_days(df: pd.DataFrame, x: int = 30) -> pd.Da
     return last_visits[last_visits["start"] < threshold_date]
 
 
+roi_pattern = r"[rR][oO][iI]"
+
+
 def get_last_visits_from_roihunter(df: pd.DataFrame) -> pd.DataFrame:
     last_visits = get_last_visits(df)
-    roi_pattern = r"[rR][oO][iI]"
     last_visits["bookingNote"] = last_visits["bookingNote"].fillna("")
     last_visits["emailAddress"] = last_visits["emailAddress"].fillna("")
     return last_visits[last_visits["bookingNote"].str.contains(roi_pattern)
                        | last_visits["emailAddress"].str.contains(roi_pattern)]
+
+
+def get_visits_from_roihunter_for_month(df: pd.DataFrame, month, year=2025) -> pd.DataFrame:
+    return df[(df["bookingNote"].str.contains(roi_pattern) | df["emailAddress"].str.contains(roi_pattern))
+              & (df["start"] >= pd.Timestamp(year=2025, month=month, day=1, tz="UTC"))
+              & (df["start"] < pd.Timestamp(year=2025, month=month+1, day=1, tz="UTC"))
+              ]
 
 
 # ----------------------------------------------------------------------
@@ -122,7 +131,7 @@ def get_patients_who_did_not_use_their_voucher(df: pd.DataFrame) -> pd.DataFrame
     and another for expiration date = isValidUntil.
     """
     df = df.copy()
-    df = df.dropna(subset=["bookingNote"])      # filter rows with bookingNote
+    df = df.dropna(subset=["bookingNote"])  # filter rows with bookingNote
     df["bookingNote"] = df["bookingNote"].astype(str)
 
     # filter rows with info about the number of visit in bookingNote

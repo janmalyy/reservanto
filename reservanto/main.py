@@ -5,16 +5,17 @@ import pandas as pd
 from reservanto import settings
 from reservanto.process_data import (convert_nan_to_empty_strings, get_only_once_patients,
                                      get_patients_who_did_not_come_x_days, get_last_visits_from_roihunter,
-                                     get_patients_who_did_not_use_their_voucher)
+                                     get_patients_who_did_not_use_their_voucher, get_visits_from_roihunter_for_month)
 from reservanto.google_sheets import create, export_pandas_df_to_sheets
+
 
 if __name__ == '__main__':
     title = "reservanto-automatic-" + str(datetime.date.today())
     # title = "reservanto-automatic_4.3.2025"
     email_address = settings.GOOGLE_EMAIL_ADDRESS
     spreadsheet_id = create(title, email_address)
-
-    df = pd.read_csv(settings.RESERVANTO_DIR / "reservanto" / "reservanto.csv", sep=";", encoding="utf-8")
+    # change before export for the actual csv file!
+    # df = pd.read_csv(settings.RESERVANTO_DIR / "reservanto" / "reservanto_2025-04-06.csv", sep=";", encoding="utf-8")
 
     # choose only relevant columns
     df = df[["title", "createdAt", "start", "end",
@@ -43,18 +44,21 @@ if __name__ == '__main__':
 
     # compute info
     x = 100
-    a, b, c, d = (get_only_once_patients(df.copy()), get_patients_who_did_not_come_x_days(df.copy(), x),
-                  get_last_visits_from_roihunter(df.copy()), get_patients_who_did_not_use_their_voucher(df.copy()))
+    a, b, c, d, e = (get_only_once_patients(df.copy()), get_patients_who_did_not_come_x_days(df.copy(), x),
+                     get_last_visits_from_roihunter(df.copy()), get_visits_from_roihunter_for_month(df.copy(), 3),
+                     get_patients_who_did_not_use_their_voucher(df.copy()))
     sheets = {
         "přišli_jen_jednou": a,
         f"nepřišli_{x}_dní": b,
         "poslední_návštěvy_z_roihunteru": c,
-        "nevyužité vouchery": d
+        "návštěvy_z_roihunteru_za_březen": d,
+        "nevyužité_vouchery": e,
+
     }
 
     # Beautify for export
     for sheet_name in sheets.keys():
-        if sheet_name == "nevyužité vouchery":
+        if sheet_name == "nevyužité_vouchery":
             sheets[sheet_name] = sheets[sheet_name][["title", "createdAt", "start", "customer",
                                                      "phoneNumber", "emailAddress", "bookingNote",
                                                      "isValidUntil", "isValidVoucher"]]
@@ -69,7 +73,7 @@ if __name__ == '__main__':
         sheets[sheet_name] = convert_nan_to_empty_strings(sheets[sheet_name])
         sheets[sheet_name] = sheets[sheet_name][
             sheets[sheet_name]["title"].notna()]  # Get rid of rows with None in title column
-        print(sheets[sheet_name].info())
+        # print(sheets[sheet_name].info())
 
     df = df[["title", "createdAt", "start", "end",
              "customer", "phoneNumber", "emailAddress", "bookingNote",

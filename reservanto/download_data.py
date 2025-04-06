@@ -1,3 +1,4 @@
+import datetime
 import json
 import time
 
@@ -50,4 +51,5 @@ if __name__ == "__main__":
         login_response.raise_for_status()  # Raises exception when not a 2xx response
 
         df = fetch_data_to_dataframe(url, s)
-        df.to_csv("reservanto.csv", sep=";", encoding="utf-8")
+
+        df.to_csv(f"reservanto_{str(datetime.date.today())}.csv", sep=";", encoding="utf-8")
