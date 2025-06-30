@@ -52,4 +52,5 @@ if __name__ == "__main__":
 
         df = fetch_data_to_dataframe(url, s)
 
-        df.to_csv(f"reservanto_{str(datetime.date.today())}.csv", sep=";", encoding="utf-8")
+        # df.to_csv(f"reservanto_{str(datetime.date.today())}.csv", sep=";", encoding="utf-8")
+        df.to_csv(f"reservanto_data.csv", sep=";", encoding="utf-8")

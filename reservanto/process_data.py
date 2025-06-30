@@ -74,8 +74,8 @@ def get_last_visits_from_roihunter(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_visits_from_roihunter_for_month(df: pd.DataFrame, month, year=2025) -> pd.DataFrame:
     return df[(df["bookingNote"].str.contains(roi_pattern) | df["emailAddress"].str.contains(roi_pattern))
-              & (df["start"] >= pd.Timestamp(year=2025, month=month, day=1, tz="UTC"))
-              & (df["start"] < pd.Timestamp(year=2025, month=month+1, day=1, tz="UTC"))
+              & (df["start"] >= pd.Timestamp(year=year, month=month, day=1, tz="UTC"))
+              & (df["start"] < pd.Timestamp(year=year, month=month+1, day=1, tz="UTC"))
               ]
 
 

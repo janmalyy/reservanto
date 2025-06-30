@@ -1,5 +1,13 @@
-import datetime
-
+"""
+If you want refresh the Google sheets, do:
+(Just know that it overrides any changes made to the spreadsheet in the meanwhile)
+    - run download_data.py
+    - change the month in get_visits_from_roihunter_for_month (line 56)
+    - change the name of the month (line 62)
+    - run main.py
+    - go to https://docs.google.com/spreadsheets/d/1Jp2y1VHm7w54kpC8qJ7T5BcRiIdvTaoukpqgV7XSjJE/edit?gid=57652793#gid=57652793
+      and ensure that it works as expected
+"""
 import pandas as pd
 
 from reservanto import settings
@@ -10,12 +18,12 @@ from reservanto.google_sheets import create, export_pandas_df_to_sheets
 
 
 if __name__ == '__main__':
-    title = "reservanto-automatic-" + str(datetime.date.today())
-    # title = "reservanto-automatic_4.3.2025"
+    # title = "reservanto-automatic-" + str(datetime.date.today())
+    title = "reservanto-automatic"
     email_address = settings.GOOGLE_EMAIL_ADDRESS
     spreadsheet_id = create(title, email_address)
     # change before export for the actual csv file!
-    # df = pd.read_csv(settings.RESERVANTO_DIR / "reservanto" / "reservanto_2025-04-06.csv", sep=";", encoding="utf-8")
+    df = pd.read_csv(settings.RESERVANTO_DIR / "reservanto" / "reservanto_data.csv", sep=";", encoding="utf-8")
 
     # choose only relevant columns
     df = df[["title", "createdAt", "start", "end",
@@ -45,13 +53,13 @@ if __name__ == '__main__':
     # compute info
     x = 100
     a, b, c, d, e = (get_only_once_patients(df.copy()), get_patients_who_did_not_come_x_days(df.copy(), x),
-                     get_last_visits_from_roihunter(df.copy()), get_visits_from_roihunter_for_month(df.copy(), 3),
+                     get_last_visits_from_roihunter(df.copy()), get_visits_from_roihunter_for_month(df.copy(), 5),
                      get_patients_who_did_not_use_their_voucher(df.copy()))
     sheets = {
         "přišli_jen_jednou": a,
         f"nepřišli_{x}_dní": b,
         "poslední_návštěvy_z_roihunteru": c,
-        "návštěvy_z_roihunteru_za_březen": d,
+        "návštěvy_z_roihunteru_za_květen": d,
         "nevyužité_vouchery": e,
 
     }
@@ -86,9 +94,9 @@ if __name__ == '__main__':
     df = df[df["title"].notna()]  # get rid of rows with None in title column
 
     # pd.set_option("display.max_columns", None)
-    print(df.head())
-    print(df.columns)
-    print(df.info())
+    # print(df.head())
+    # print(df.columns)
+    # print(df.info())
 
     # export
     export_pandas_df_to_sheets(spreadsheet_id, df, "všechna_data")
